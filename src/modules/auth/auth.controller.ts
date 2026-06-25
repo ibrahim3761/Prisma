@@ -12,7 +12,7 @@ const loginUser = catchAsync( async(req : Request, res : Response, next : NextFu
     sendResponse(res,{
       success: true,
       statusCode: httpStatus.OK,
-      message: "User logged in  successfully",
+      message: "User logged in successfully",
       data : {loginResult}
     })
 
