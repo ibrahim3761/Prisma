@@ -2,6 +2,7 @@ import { NextFunction, Request, RequestHandler, Response } from "express";
 import httpStatus from "http-status";
 import { userService } from "./user.service";
 import { catchAsync } from "../../utitils/catchAsync";
+import { sendResponse } from "../../utitils/sendResponse";
 
 // const registerUser = async (req: Request, res: Response) => {
 //   try {
@@ -34,14 +35,12 @@ const registerUser = catchAsync(
 
     const user = await userService.registerUserIntoDB(payload);
 
-    res.status(httpStatus.CREATED).json({
+    sendResponse(res,{
       success: true,
-      status: httpStatus.CREATED,
+      statusCode: httpStatus.CREATED,
       message: "User registered successfully",
-      data: {
-        user,
-      },
-    });
+      data : {user}
+    })
   },
 );
 
