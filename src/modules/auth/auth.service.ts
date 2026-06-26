@@ -14,6 +14,10 @@ const loginUser = async (payload: ILoginUser) => {
     },
   });
 
+  if (user.activeStatus === "BLOCKED") {
+    throw new Error("Your ccount has been blocked. Please contact support!!");
+  }
+
   const isPaasswordMtched = await bcrypt.compare(password, user.password);
 
   if (!isPaasswordMtched) {
@@ -44,7 +48,7 @@ const loginUser = async (payload: ILoginUser) => {
   const refreshToken = jwtUtils.createToken(
     jwtPayload,
     config.jwt_refresh_secret,
-    config.jwt_refresh_expires_in as SignOptions
+    config.jwt_refresh_expires_in as SignOptions,
   );
 
   return {
