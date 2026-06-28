@@ -15,7 +15,7 @@ enum PostStatus {
   ARCHIVED
 }
 
-enum ComentStatus {
+enum CommentStatus {
   APPROVED
-  Reject
+  REJECT
 }
