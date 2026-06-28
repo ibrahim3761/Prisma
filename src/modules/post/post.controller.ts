@@ -35,14 +35,27 @@ const getPostsStats = catchAsync(async(req: Request, res: Response, next: NextFu
 })
 
 const getMyPosts = catchAsync(async(req: Request, res: Response, next: NextFunction) =>{
+    const authorId = req.user?.id;
 
+    if(!authorId){
+        throw new Error("Author Id Reqquired In Params")
+    }
+
+    const result = await postService.getMyPosts(authorId as string)
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "My Posts retrieved successfuly",
+        data: result
+    })
 })
 
 const getPostById = catchAsync(async(req: Request, res: Response, next: NextFunction) =>{
     const postId = req.params.postId;
 
     if(!postId){
-        throw new Error("Post Id Reqquired in params")
+        throw new Error("Post Id Reqquired In Params")
     }
 
     const result = await postService.getPostById(postId as string)
