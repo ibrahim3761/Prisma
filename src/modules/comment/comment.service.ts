@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma"
-import { ICreateCommentPayload } from "./comment.interface"
+import { ICreateCommentPayload, IUpdateCommentPayload } from "./comment.interface"
 
 const createComment = async (authorId: string, payload: ICreateCommentPayload) => {
     await prisma.post.findUniqueOrThrow({
@@ -48,17 +48,81 @@ const getCommentByPostId  = async (postId : string) => {
     return comment
 }
 
-const updateComment = () => {
+const updateComment = async (commentId: string, data: IUpdateCommentPayload, authorId: string) => {
+    const commentData = await prisma.comment.findUniqueOrThrow({
+        where: {
+            id: commentId,
+            authorId
+        },
+        select: {
+            id: true
+        }
+    })
 
+    // if (!commentData) {
+    //     throw new Error("Your provided input is invalid!")
+    // }
+
+    const comment =await prisma.comment.update({
+        where: {
+            id: commentId,
+            authorId
+        },
+        data
+    })
+
+    return comment
 }
 
-const deleteComment = () => {
+const deleteComment = async (commentId: string, authorId: string) => {
+    const commentData = await prisma.comment.findUniqueOrThrow({
+        where: {
+            id: commentId,
+            authorId
+        },
+        select: {
+            id: true
+        }
+    })
 
+    // if (!commentData) {
+    //     throw new Error("Your provided input is invalid!")
+    // }
+
+    const comment = await prisma.comment.delete({
+        where: {
+            id: commentData.id
+        }
+    });
+
+    return comment;
 }
 
-const moderateComment = () => {
+const moderateComment = async (id: string, data: IModerateCommentPayload) => {
+    const commentData = await prisma.comment.findUniqueOrThrow({
+        where: {
+            id
+        },
+        select: {
+            id: true,
+            status: true
+        }
+    });
 
+    if (commentData.status === data.status) {
+        throw new Error(`Your provided status (${data.status}) is already up to date.`)
+    }
+
+    const comment = await prisma.comment.update({
+        where: {
+            id
+        },
+        data
+    });
+
+    return comment;
 }
+
 
 export const commentService = {
     createComment,
