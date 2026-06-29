@@ -15,6 +15,105 @@ const createPost = async (payload: ICreatePostPayload, userId: string) => {
 
 const getAllPosts = async () => {
   const posts = await prisma.post.findMany({
+    // filtering / exact match without AND operator
+    // where : {
+    //   title : "My Third Post",
+    //   content : "Ronaldo"
+    // },
+
+    // filtering / exact match with AND operator
+    // where: {
+    //   AND: [
+    //     {
+    //       title: "My Third Post",
+    //     },
+    //     {
+    //       content: "Ronaldo",
+    //     },
+    //     {
+    //       tags: {
+    //         equals: ["typescripts", "prisma", "express"],
+    //       },
+    //     },
+    //   ],
+    // },
+
+    // searching / partial match
+
+    // where:{
+    //   title : {
+    //     contains : "ronaldo",
+    //     mode : "insensitive"
+    //   },
+    //   // X Not ideal for partial match
+    //   // content : {
+    //   //   contains : "Ronaldo"
+    //   // }
+    // },
+
+    // searching / partial search with OR operator
+
+    // where: {
+    //   OR: [
+    //     {
+    //       title: {
+    //         contains: "ronaldo",
+    //         mode: "insensitive",
+    //       }
+    //     },
+    //     {
+    //       content : {
+    //         contains : "Ronaldo",
+    //         mode: "insensitive"
+    //       }
+    //     }
+    //   ],
+    // },
+
+    // combining search (OR) and filtering (AND)
+
+    // where : {
+    //   //filtering & seaching combine
+    //   AND:[
+    //     {
+    //       //searching
+    //       OR : [
+    //         {
+    //           title : {
+    //             contains : "Ronaldo",
+    //             mode : "insensitive"
+    //           }
+    //         },
+    //         {
+    //           content : {
+    //             contains : "Ronaldo",
+    //             mode : "insensitive"
+    //           }
+    //         }
+    //       ]
+    //     },
+    //     // filtering
+    //     {
+    //       title : "Ronaldo Nazario"
+    //     },
+    //     {
+    //       content : "Ronaldo"
+    //     }
+    //   ]
+    // },
+
+    take : 1,
+    // skip : 1,
+    skip:2,
+    // skip = (page-1) * limit
+
+    //sorting
+    orderBy : {
+      createdAt : "desc",
+      title : "asc",
+      content : "desc"
+    },
+
     include: {
       author: {
         omit: {
@@ -150,9 +249,8 @@ const getPostsStats = async () => {
       totalComments,
       totalApprovedComments,
       totalRejectedComments,
-      totalPostViews : totalPostViewsAggregate._sum.views
+      totalPostViews: totalPostViewsAggregate._sum.views,
     };
-
   });
 
   return transactionResult;
