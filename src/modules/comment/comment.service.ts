@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma"
-import { ICreateCommentPayload, IUpdateCommentPayload } from "./comment.interface"
+import { ICreateCommentPayload, IModerateCommentPayload, IUpdateCommentPayload } from "./comment.interface"
 
 const createComment = async (authorId: string, payload: ICreateCommentPayload) => {
     await prisma.post.findUniqueOrThrow({
