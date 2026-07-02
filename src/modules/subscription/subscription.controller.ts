@@ -1,8 +1,22 @@
 import { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../../utitils/catchAsync";
+import { subscriptionServices } from "./subscription.service";
+import { sendResponse } from "../../utitils/sendResponse";
+import httpStatus from "http-status";
 
 const createCheckoutSession = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {},
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.user?.id as string;
+
+    const result = await subscriptionServices.createCheckoutSession(userId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Checkout completed successfully",
+        data: result,
+    })
+  },
 );
 
 export const subscriptionController = {
