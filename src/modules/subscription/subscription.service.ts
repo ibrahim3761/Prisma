@@ -1,9 +1,9 @@
+import Stripe from "stripe";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { stripe } from "../../lib/stripe";
 
 const createCheckoutSession = async (userId: string) => {
-      
   const transactionResult = await prisma.$transaction(async (tx) => {
     const user = await tx.user.findUniqueOrThrow({
       where: {
@@ -26,9 +26,7 @@ const createCheckoutSession = async (userId: string) => {
           userId: user.id,
         },
       });
-
     }
-    console.log(config.stripe_product_price_id);
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
@@ -40,7 +38,7 @@ const createCheckoutSession = async (userId: string) => {
       customer: stripeCustomerId,
       payment_method_types: ["card"],
       success_url: `${config.app_url}/premium?success=true`,
-      cancel_url:  `${config.app_url}/payment?success=false`,
+      cancel_url: `${config.app_url}/payment?success=false`,
       metadata: {
         userId: user.id,
       },
@@ -52,6 +50,53 @@ const createCheckoutSession = async (userId: string) => {
   };
 };
 
+const handleWebhook = async (payload: Buffer, signature: string) => {
+  const endpointSecret = config.stripe_webhook_secret;
+  const event = stripe.webhooks.constructEvent(
+    payload,
+    signature,
+    endpointSecret,
+  );
+  // Handle the event
+  switch (event.type) {
+    case "checkout.session.completed":
+      //Occurs when a Checkout Session has been successfully completed.
+      console.log(event.data.object); 
+      const session : Stripe.Checkout.Session= event.data.object
+      const userId = session.metadata?.userId;
+      const stripeCustomerId = session.customer;
+      const stripeSubscrtiptionId = session.subscription as string
+
+      if(!userId || !stripeCustomerId || !stripeSubscrtiptionId){
+        throw new Error("Webhook Failed")
+      }
+
+      const stripeSubscription = await stripe.subscriptions.retrieve(stripeSubscrtiptionId);
+
+      console.log("sub info", stripeSubscription.items.data[0]);
+
+      const currentPeriodStartInMs = stripeSubscription.items.data[0]?.current_period_start!
+      const currentPeriodEndInMs = stripeSubscription.items.data[0]?.current_period_end!
+
+      const currentPeriodStart = new Date(currentPeriodStartInMs * 1000);
+      const currentPeriodEnd = new Date(currentPeriodEndInMs * 1000);
+      
+      console.log(currentPeriodEnd);
+      
+      break;
+    case "customer.subscription.updated":
+      //Occurs whenever a subscription changes (e.g., switching from one plan to another, or changing the status from trial to active).
+      break;
+    case "customer.subscription.deleted":
+      //Occurs whenever a customer’s subscription ends
+      break;
+    default:
+      // Unexpected event type
+      console.log(`No events matched. Unhandled event type ${event.type}.`);
+      break;
+  }
+};
 export const subscriptionServices = {
   createCheckoutSession,
+  handleWebhook,
 };
