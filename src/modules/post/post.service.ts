@@ -9,6 +9,18 @@ import {
 import { PostWhereInput } from "../../../generated/prisma/models";
 
 const createPost = async (payload: ICreatePostPayload, userId: string) => {
+  const user = await prisma.user.findUniqueOrThrow({
+    where: {
+      id: userId,
+    },
+    include: {
+      subscription: true,
+    },
+  });
+
+  if (payload.isPremium && user.subscription?.status !== "ACTIVE") {
+    throw new Error("You are not a premium user. Please subscribe to create premium content");
+  }
   const result = await prisma.post.create({
     data: {
       ...payload,
@@ -27,10 +39,9 @@ const getAllPosts = async (query: IPostQuery) => {
   const sortBy = query.sortBy ? query.sortBy : "createdAt";
   const sortOrder = query.sortOrder ? query.sortOrder : "desc";
 
-  const tags = query.tags ? JSON.parse(query.tags as string) : null
+  const tags = query.tags ? JSON.parse(query.tags as string) : null;
 
-  const tagsArray = Array.isArray(tags) ? tags : []
-  
+  const tagsArray = Array.isArray(tags) ? tags : [];
 
   const andConditions: PostWhereInput[] = [];
 
@@ -80,16 +91,20 @@ const getAllPosts = async (query: IPostQuery) => {
   if (query.tags) {
     andConditions.push({
       tags: {
-        hasSome : tagsArray
-      }
+        hasSome: tagsArray,
+      },
     });
   }
-  
+
   if (query.status) {
     andConditions.push({
       status: query.status,
     });
   }
+
+  andConditions.push({
+    isPremium: false,
+  });
 
   const posts = await prisma.post.findMany({
     // filtering / exact match without AND operator
@@ -244,7 +259,21 @@ const getAllPosts = async (query: IPostQuery) => {
       comments: true,
     },
   });
-  return posts;
+
+  const totalPostCount = await prisma.post.count({
+    where : {
+      AND : andConditions
+    }
+  })
+  return {
+    data : posts,
+    meta : {
+      page : page,
+      limit : limit,
+      total : totalPostCount,
+      totalPages : Math.ceil(totalPostCount/limit)
+    }
+  };
 };
 
 const getPostsStats = async () => {
@@ -460,6 +489,7 @@ const getPostById = async (postId: string) => {
     const post = await tx.post.findUniqueOrThrow({
       where: {
         id: postId,
+        isPremium: false,
       },
       include: {
         author: {

@@ -1,125 +1,148 @@
-import { NextFunction, Request, Response } from "express"
-import { catchAsync } from "../../utitils/catchAsync"
+import { NextFunction, Request, Response } from "express";
+import { catchAsync } from "../../utitils/catchAsync";
 import { postService } from "./post.service";
 import { sendResponse } from "../../utitils/sendResponse";
 import httpStatus from "http-status";
 
-const createPost = catchAsync(async(req: Request, res: Response, next: NextFunction) =>{
-    const id = req.user?.id
+const createPost = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.user?.id;
 
     const payload = req.body;
-    
-    const result = await postService.createPost(payload,id as string)
+
+    const result = await postService.createPost(payload, id as string);
 
     sendResponse(res, {
-        success : true,
-        statusCode : httpStatus.CREATED,
-        message : "Post Created SuccessFully",  
-        data : result
-    })
-})
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "Post Created SuccessFully",
+      data: result,
+    });
+  },
+);
 
-const getAllPosts = catchAsync(async(req: Request, res: Response, next: NextFunction) =>{
+const getAllPosts = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
     const query = req.query;
-    
+
     const result = await postService.getAllPosts(query);
 
     sendResponse(res, {
-        success : true,
-        statusCode : httpStatus.OK,
-        message : "Posts Retrieved Successfully",
-        data : result
-    })
-})
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Posts Retrieved Successfully",
+      data: result.data,
+      meta: result.meta
+    });
+  },
+);
 
-const getPostsStats = catchAsync(async(req: Request, res: Response, next: NextFunction) =>{
+const getPostsStats = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
     const result = await postService.getPostsStats();
 
     sendResponse(res, {
-        success : true,
-        statusCode : httpStatus.OK,
-        message : "Posts Stats Retrieved Successfully",
-        data : result
-    })
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Posts Stats Retrieved Successfully",
+      data: result,
+    });
+  },
+);
 
-})
-
-const getMyPosts = catchAsync(async(req: Request, res: Response, next: NextFunction) =>{
+const getMyPosts = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
     const authorId = req.user?.id;
 
-    if(!authorId){
-        throw new Error("Author Id Reqquired In Params")
+    if (!authorId) {
+      throw new Error("Author Id Reqquired In Params");
     }
 
-    const result = await postService.getMyPosts(authorId as string)
+    const result = await postService.getMyPosts(authorId as string);
 
     sendResponse(res, {
-        success: true,
-        statusCode: httpStatus.OK,
-        message: "My Posts retrieved successfuly",
-        data: result
-    })
-})
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "My Posts retrieved successfuly",
+      data: result,
+    });
+  },
+);
 
-const getPostById = catchAsync(async(req: Request, res: Response, next: NextFunction) =>{
+const getPostById = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
     const postId = req.params.postId;
 
-    if(!postId){
-        throw new Error("Post Id Reqquired In Params")
+    if (!postId) {
+      throw new Error("Post Id Reqquired In Params");
     }
 
-    const result = await postService.getPostById(postId as string)
+    const result = await postService.getPostById(postId as string);
 
     sendResponse(res, {
-        success : true,
-        statusCode : httpStatus.OK,
-        message : "Post retrieved successfuly",
-        data : result
-    })
-})
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Post retrieved successfuly",
+      data: result,
+    });
+  },
+);
 
-const updatePost = catchAsync(async(req: Request, res: Response, next: NextFunction) =>{
+const updatePost = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
     const authorId = req.user?.id;
     const isAdmin = req.user?.role === "ADMIN";
     const postId = req.params.postId;
     if (!postId) {
-        throw new Error("Post Id Required In Params")
+      throw new Error("Post Id Required In Params");
     }
     const payload = req.body;
-    const result = await postService.updatePost(postId as string, payload,  authorId as string, isAdmin)
+    const result = await postService.updatePost(
+      postId as string,
+      payload,
+      authorId as string,
+      isAdmin,
+    );
 
     sendResponse(res, {
-        success: true,
-        statusCode: httpStatus.OK,
-        message: "Post updated successfully",
-        data: result
-    })
-})
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Post updated successfully",
+      data: result,
+    });
+  },
+);
 
-const deletePost = catchAsync(async(req: Request, res: Response, next: NextFunction) =>{
+const deletePost = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
     const authorId = req.user?.id;
     const isAdmin = req.user?.role === "ADMIN";
     const postId = req.params.postId;
     if (!postId) {
-        throw new Error("Post Id Required In Params")
+      throw new Error("Post Id Required In Params");
     }
 
-    const result = await postService.deletePost(postId as string,  authorId as string, isAdmin)
+    const result = await postService.deletePost(
+      postId as string,
+      authorId as string,
+      isAdmin,
+    );
 
     sendResponse(res, {
-        success: true,
-        statusCode: httpStatus.OK,
-        message: "Post deleted successfully",
-        data: result
-    })
-})
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Post deleted successfully",
+      data: result,
+    });
+  },
+);
 
-export const postController ={
-    getAllPosts,
-    createPost,
-    getPostsStats,
-    getMyPosts,
-    getPostById,
-    updatePost,
-    deletePost
-}
+export const postController = {
+  getAllPosts,
+  createPost,
+  getPostsStats,
+  getMyPosts,
+  getPostById,
+  updatePost,
+  deletePost,
+};
