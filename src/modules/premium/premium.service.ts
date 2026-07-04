@@ -81,6 +81,24 @@ const getPremiumContent = async (query: IPostQuery) => {
     where: {
       AND: andConditions,
     },
+    //dynamic pagination
+    take: limit,
+    skip: skip,
+
+    // dynamic sorting
+    orderBy: {
+      // sortBY : sortOrder
+      [sortBy]: sortOrder,
+    },
+
+    include: {
+      author: {
+        omit: {
+          password: true,
+        },
+      },
+      comments: true,
+    },
   });
 
   const totalPostCount = await prisma.post.count({
