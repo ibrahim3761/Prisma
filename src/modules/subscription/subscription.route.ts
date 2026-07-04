@@ -5,9 +5,18 @@ import { Role } from "../../../generated/prisma/enums";
 
 const router = Router();
 
+router.post(
+  "/checkout",
+  auth(Role.AUTHOR, Role.ADMIN, Role.USER),
+  subscriptionController.createCheckoutSession,
+);
 
-router.post("/checkout",auth(Role.AUTHOR,Role.ADMIN,Role.USER),subscriptionController.createCheckoutSession )
+router.post("/webhook", subscriptionController.handleWebhook);
 
-router.post("/webhook", subscriptionController.handleWebhook );
+router.get(
+  "/status",
+  auth(Role.ADMIN, Role.AUTHOR, Role.USER),
+  subscriptionController.getSubscriptionStatus,
+);
 
 export const subscriptionRoutes = router;
