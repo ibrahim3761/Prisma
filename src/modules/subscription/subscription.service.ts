@@ -99,7 +99,7 @@ const getSubscriptionStatus = async (userId: string) => {
 
   return {
     isActive,
-    isSubscibed : isActive,
+    isSubscribed : isActive,
     currentPeriodEnd : isSubscriptionExist.currentPeriodEnd,
   };
 };

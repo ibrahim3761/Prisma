@@ -1,3 +1,4 @@
+import { CommentStatus } from "../../../generated/prisma/enums";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 import { IPostQuery } from "../post/post.interface";
@@ -118,6 +119,35 @@ const getPremiumContent = async (query: IPostQuery) => {
   };
 };
 
+const getPremiumPostById = async (postId: string) => {
+  const transactionResult = await prisma.$transaction(async (tx) => {
+    await tx.post.update({
+      where: { id: postId },
+      data: { views: { increment: 1 } },
+    });
+
+    const post = await tx.post.findUniqueOrThrow({
+      where: {
+        id: postId,
+        isPremium: true, // ✅ ensures only premium posts
+      },
+      include: {
+        author: { omit: { password: true } },
+        comments: {
+          where: { status: CommentStatus.APPROVED },
+          orderBy: { createdAt: "desc" },
+        },
+        _count: { select: { comments: true } },
+      },
+    });
+
+    return post;
+  });
+
+  return transactionResult;
+};
+
 export const premiumServices = {
   getPremiumContent,
+  getPremiumPostById,
 };

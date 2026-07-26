@@ -15,4 +15,11 @@ router.get(
   premiumController.getPremiumContent,
 );
 
+router.get(
+  "/:postId",
+  auth(Role.ADMIN, Role.USER, Role.AUTHOR),
+  subscriptionGuard(),
+  premiumController.getPremiumPostById,
+);
+
 export const premiumRoutes = router;
