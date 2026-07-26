@@ -7,7 +7,7 @@ const router = Router();
 
 router.post("/register", userController.registerUser);
 
-router.post(
+router.get(
   "/me",
   auth(Role.ADMIN, Role.AUTHOR, Role.USER),
   userController.getMyProfile,
