@@ -4,7 +4,7 @@ import { PostWhereInput } from "../../../generated/prisma/models";
 export interface ICreatePostPayload {
   title: string;
   content: string;
-  thumbnail?: string;
+  thumbnails?: string;
   isFeatured?: boolean;
   isPremium?: boolean;
   status?: PostStatus;
@@ -14,7 +14,7 @@ export interface ICreatePostPayload {
 export interface IUpdatePostPaylaod {
   title?: string;
   content?: string;
-  thumbnail?: string;
+  thumbnails?: string;
   isFeatured?: boolean;
   status?: PostStatus;
   tags?: string[];
